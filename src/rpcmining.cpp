@@ -179,8 +179,8 @@ Value getstakinginfo(const Array& params, bool fHelp)
 
     uint64 nNetworkWeight = GetPoSVKernelPS();
     bool staking = nLastCoinStakeSearchInterval && nAverageWeight;
-    int nExpectedTime = staking ? (nTargetSpacing * nNetworkWeight / nAverageWeight) : -1;
-
+  //  int nExpectedTime = staking ? (nTargetSpacing * nNetworkWeight / nAverageWeight) : -1;//pot-
+    uint64 nExpectedTime = nTargetSpacing * nNetworkWeight / nTotalWeight; //pot+
     Object obj;
 
     obj.push_back(Pair("enabled", GetBoolArg("-staking", true)));
@@ -196,8 +196,8 @@ Value getstakinginfo(const Array& params, bool fHelp)
     obj.push_back(Pair("averageweight", (uint64_t)nAverageWeight));
     obj.push_back(Pair("totalweight", (uint64_t)nTotalWeight));
     obj.push_back(Pair("netstakeweight", (uint64_t)nNetworkWeight));
-    obj.push_back(Pair("expectedtime", nExpectedTime));
-
+   // obj.push_back(Pair("expectedtime", nExpectedTime));//pot-
+	obj.push_back(Pair("expectedtime", staking ? (uint64_t)nExpectedTime : -1));//pot+
     return obj;
 }
 

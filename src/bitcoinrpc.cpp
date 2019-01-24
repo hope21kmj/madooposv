@@ -271,6 +271,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getstakinginfo",         &getstakinginfo,         true,      false,      false },
     { "getcheckpoint",          &getcheckpoint,          true,      true,       false },
     { "reservebalance",         &reservebalance,         false,     false,      false },
+	{ "getinterest",            &getinterest,            false,     false,      true }, //pot+
 };
 
 CRPCTable::CRPCTable()
@@ -1205,7 +1206,8 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "verifychain"            && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "reservebalance"         && n > 0) ConvertTo<bool>(params[0]);
     if (strMethod == "reservebalance"         && n > 1) ConvertTo<double>(params[1]);
-
+    if (strMethod == "getinterest"            && n > 0) ConvertTo<boost::int64_t>(params[0]); //pot+
+    if (strMethod == "getinterest"            && n > 1) ConvertTo<boost::int64_t>(params[1]); //pot+
     return params;
 }
 

@@ -31,7 +31,7 @@ void EnsureWalletIsUnlocked()
     if (pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
     if (fWalletUnlockStakingOnly)
-        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet is unlocked for staking only.");
+        throw JSONRPCError(RPC_WALLET_ALREADY_UNLOCKED_STAKING_ONLY, "Error: Wallet is unlocked for staking only."); //pot+
 }
 
 void WalletTxToJSON(const CWalletTx& wtx, Object& entry)
@@ -80,6 +80,8 @@ Value getinfo(const Array& params, bool fHelp)
         obj.push_back(Pair("balance",            ValueFromAmount(pwalletMain->GetBalance())));
         obj.push_back(Pair("unconfirmedbalance", ValueFromAmount(pwalletMain->GetUnconfirmedBalance())));
         obj.push_back(Pair("stake",              ValueFromAmount(pwalletMain->GetStake())));
+        obj.push_back(Pair("locked",             pwalletMain->IsLocked())); //pot+
+        obj.push_back(Pair("encrypted",          pwalletMain->IsCrypted())); //pot+
     }
     obj.push_back(Pair("blocks",        (int)nBestHeight));
     obj.push_back(Pair("timeoffset",    (boost::int64_t)GetTimeOffset()));
@@ -298,8 +300,9 @@ Value sendtoaddress(const Array& params, bool fHelp)
     if (params.size() > 3 && params[3].type() != null_type && !params[3].get_str().empty())
         wtx.mapValue["to"]      = params[3].get_str();
 
-    if (pwalletMain->IsLocked())
-        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
+	EnsureWalletIsUnlocked(); //pot+
+ //   if (pwalletMain->IsLocked())
+ //       throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first."); //pot-
 
     string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, wtx);
     if (strError != "")
@@ -1616,6 +1619,38 @@ Value reservebalance(const Array& params, bool fHelp)
     return result;
 }
 
+// posv: interest received
+Value getinterest(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() > 2)
+        throw runtime_error(
+            "getinterest [start] [end]\n"
+            "Both [start] and [end] are inclusive and in the form of UNIX timestamps.");
+
+    unsigned int nTimeStart = 0;
+    unsigned int nTimeEnd = -1;
+    if (params.size() >= 1)
+        nTimeStart = (unsigned int)(params[0].get_int());
+    if (params.size() == 2)
+        nTimeEnd = (unsigned int)(params[1].get_int());
+
+    int64 nInterest = 0;
+    for (map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+    {
+        const CWalletTx& wtx = (*it).second;
+        if (!wtx.IsCoinStake() || wtx.nTime < nTimeStart || wtx.nTime > nTimeEnd)
+            continue;
+
+        int64 nDebit = wtx.GetDebit();
+        int64 nCredit = wtx.GetCredit();
+
+        if (nDebit <= 0 || nCredit <= 0 || nDebit >= nCredit)
+            continue;
+        else
+            nInterest += nCredit - nDebit;
+    }
+	return  ValueFromAmount(nInterest);
+  }
 Value lockunspent(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 2)

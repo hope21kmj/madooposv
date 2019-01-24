@@ -513,7 +513,7 @@ class CTransaction
 public:
     static int64 nMinTxFee;
     static int64 nMinRelayTxFee;
-    static const int CURRENT_VERSION=2;
+    static const int CURRENT_VERSION=4;
     int nVersion;
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
@@ -684,7 +684,7 @@ public:
     {
         // Large (in bytes) low-priority (new, small-coin) transactions
         // need a fee.
-        return dPriority > COIN * 2880 / 250;
+        return dPriority > COIN * 1440 / 250;
     }
 
     // Apply the effects of this transaction on the UTXO set represented by view
@@ -1085,8 +1085,9 @@ public:
         // tx timestamp
         nSize += ::GetSerializeSize(VARINT(nTime), nType, nVersion);
         // coinstake
-        char nCoinStake = fCoinStake ? 1 : 0;
-        nSize += ::GetSerializeSize(VARINT(nCoinStake), nType, nVersion);
+      //  char nCoinStake = fCoinStake ? 1 : 0; //pot-
+     //   nSize += ::GetSerializeSize(VARINT(nCoinStake), nType, nVersion); //pot-
+	nSize += 1; //pot+
         return nSize;
     }
 
@@ -1120,8 +1121,11 @@ public:
         // tx timestamp
         ::Serialize(s, VARINT(nTime), nType, nVersion);
         // coinstake
-        char nCoinStake = fCoinStake ? 1 : 0;
-        ::Serialize(s, VARINT(nCoinStake), nType, nVersion);
+//        char nCoinStake = fCoinStake ? 1 : 0; //pot-
+//        ::Serialize(s, VARINT(nCoinStake), nType, nVersion);//pot-
+	unsigned char nCoinStake = fCoinStake ? 1 : 0; //pot+
+        ::Serialize(s, nCoinStake, nType, nVersion); //pot+
+
     }
 
     template<typename Stream>
@@ -1158,8 +1162,10 @@ public:
         // tx timestamp
         ::Unserialize(s, VARINT(nTime), nType, nVersion);
         // coinstake
-        char nCoinStake = 0;
-        ::Unserialize(s, VARINT(nCoinStake), nType, nVersion);
+       // char nCoinStake = 0;//pot-
+       // ::Unserialize(s, VARINT(nCoinStake), nType, nVersion);//pot-
+	unsigned char nCoinStake = 0; //pot+
+        ::Unserialize(s, nCoinStake, nType, nVersion);//pot+
         fCoinStake = nCoinStake & 1;
         Cleanup();
     }
@@ -1694,7 +1700,7 @@ public:
     bool AddToBlockIndex(CValidationState &state, const CDiskBlockPos &pos, uint256 &hashProof);
 
     // Context-independent validity checks
-    bool CheckBlock(CValidationState &state, bool fCheckPOW=true, bool fCheckMerkleRoot=true, bool fCheckSig=true) const;
+    bool CheckBlock(CValidationState &state, bool fCheckPOW=true, bool fCheckMerkleRoot=true, bool fCheckSig=false) const;
 
     // Store block on disk
     // if dbp is provided, the file is known to already reside on disk

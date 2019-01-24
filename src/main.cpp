@@ -1806,7 +1806,7 @@ bool CBlock::ConnectBlock(CValidationState &state, CBlockIndex* pindex, CCoinsVi
     if (GetHash() == hashGenesisBlock) {
         view.SetBestBlock(pindex);
         pindexGenesisBlock = pindex;
-        pindexGenesisBlock->nMoneySupply = 0 * COIN;
+        pindexGenesisBlock->nMoneySupply = 1500 * COIN;
         return true;
     }
 
