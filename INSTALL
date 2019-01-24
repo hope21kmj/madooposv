@@ -1,0 +1,9 @@
+Building Madoocoin
+
+See doc/readme-qt.rst for instructions on building Madoocoin-Qt,
+the intended-for-end-users, nice-graphical-interface, reference
+implementation of Madoocoin.
+
+See doc/build-*.txt for instructions on building madoocoind,
+the intended-for-services, no-graphical-interface, reference
+implementation of Madoocoin.
