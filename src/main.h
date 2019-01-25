@@ -78,7 +78,7 @@ inline int64 PastDrift(int64 nTime)   { return nTime - 10 * 60; } // up to 10 mi
 inline int64 FutureDrift(int64 nTime) { return nTime + 10 * 60; } // up to 10 minutes from the future
 
 // Madoocoin PoSV
-static const int LAST_POW_BLOCK = 350 - 1;
+static const int LAST_POW_BLOCK = 150 - 1;
 static const int64 COIN_YEAR_REWARD = 5 * CENT; // 5% per year
 
 extern CScript COINBASE_FLAGS;

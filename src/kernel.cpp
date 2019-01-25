@@ -31,8 +31,8 @@ static std::map<int, uint64> mapStakeModifierCheckpoints =
 // Hard checkpoints of stake modifiers to ensure they are deterministic (testNet)
 static std::map<int, uint64> mapStakeModifierCheckpointsTestNet =
     boost::assign::map_list_of
-        (    10, 0x1bbb690c )
-        (    100, 0xb51a0a3a )
+        (    0, 0xfd11f4e7 )
+ 
     ;
 
 // linear coin-aging function
